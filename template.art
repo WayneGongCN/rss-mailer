@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh">
+<body>
+  <div class="container">
+  <p><b>TOC:</b></p>
+  <% for(let i = 0; i < renderData.length; i++){ %>
+    <% let data = renderData[i]; %>
+    <div>
+      <%= data.result ? data.result.title : data.feed %>: <%= data.result ? data.result.items.length : 'error' %>
+    </div>
+  <% } %>
+  </div>
+  </br>
+
+  <div class="container main">
+  <% for(let i = 0; i < renderData.length; i++){ %>
+    <% let data = renderData[i]; %>
+    <% if (data.result && data.result.items.length) { %> 
+
+      <div>
+        <a href="<%= data.result.link %>"><h3><%= data.result.title %></h3></a>
+        <% for(let i = 0; i < data.result.items.length; i++){ %>
+          <% let item = data.result.items[i]; %>
+
+          <div>
+            <div>
+              <a href="<%= item.link %>"><span><%= item.title %></span></a>
+              <div style="color: #6f6f6f;font-size: 11px;"><%= item.author ? item.author + ' - ' : '' %><%= item.pubDate %> </div>
+            </div>
+            <div><%= (item.contentSnippet || '').slice(0, 130) %>...</div>
+            </br>
+          </div>
+
+        <% } %>
+        </br>
+      </div>
+
+    <% } %>
+  <% } %>
+  </div>
+</body>
+</html>
