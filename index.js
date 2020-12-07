@@ -5,22 +5,29 @@ const artTemplate = require("art-template");
 const nodemailer = require("nodemailer");
 const Rssparser = require("rss-parser");
 const rssparser = new Rssparser();
+
+
+// init logger
 const { getLogger, configure } = require("log4js");
-
-
-let ignore = {};
-try {
-  ignore = require("./log/ignore.json");
-} catch (e) {}
-
 const logger = getLogger();
 configure({
-  appenders: { default: { type: "file", filename: path.join(__dirname, process.env.logPath) }},
-  categories: { default: { appenders: ["default"], level: process.env.logLevel } },
+  appenders: {
+    file: { type: "file", filename: path.join(__dirname, 'log', process.env.logPath) },
+    stdout: { type: 'stdout' }
+  },
+  categories: { default: { appenders: ["file", "stdout"], level: process.env.logLevel } },
 });
 
 
-logger.info("Run task ...");
+// init ignore map
+let ignore = {};
+try {
+  ignore = require(__dirname, 'log', "ignore.json");
+} catch (e) { }
+
+
+
+logger.info("Run task ----------");
 const rssConf = require("./rssConf");
 const smtpConf = {
   port: process.env.port,
@@ -42,16 +49,17 @@ fetchFeed(rssConf)
 
 
 function fetchFeed(rssConf) {
-  const promises = rssConf.feeds.map((feed) => {
-    logger.debug(`Fetching ${feed} ...`);
+  const promises = rssConf.feeds.map(feed => {
+    logger.info(`Fetching ${feed} ...`);
     return rssparser
       .parseURL(feed)
-      .then((result) => {
-        logger.debug(`Fetch ${feed} success`);
+      .then(result => {
+        logger.info(`Fetch ${feed} success`);
+        logger.debug('result: ', { ...result, items: result.items.length })
         return { feed, result };
       })
-      .catch((e) => {
-        logger.error("Error in fetch: ", feed);
+      .catch(e => {
+        logger.error("Error in fetch: ", feed, e);
         return { feed, result: null };
       });
   });
@@ -60,12 +68,13 @@ function fetchFeed(rssConf) {
 
 
 async function parseFeedData(feedsRes, rssConf) {
-  const promises = feedsRes.map((feedRes) => {
+  const promises = feedsRes.map((feedRes, idx) => {
     let data = null;
     try {
+      logger.debug(`parse feed: `, feedRes.feed)
       data = rssConf.parser(feedRes, ignore);
     } catch (e) {
-      logger.error("Error in parse: ", feedRes);
+      logger.error("Error in parse: ", feedRes, e);
     }
     return data;
   });
@@ -77,23 +86,25 @@ async function parseFeedData(feedsRes, rssConf) {
 
 
 function sendEmail(smtpConf, emailConf, content) {
+  logger.debug('sendEmail: ', smtpConf, emailConf, content.length)
   const transporter = nodemailer.createTransport(smtpConf);
   const message = {
     ...emailConf,
     html: content,
   };
 
-  logger.debug("Send email ...");
+  logger.info("Send email ...");
   transporter.sendMail(message, (e, res) => {
-    fs.writeFileSync(
-      path.join(__dirname, `log/${new Date().toISOString().slice(0, 10)}.html`),
-      content
-    );
+    logger.debug('sendEmail callback: ', e, res)
     if (e) {
       logger.error("Error in send email", e);
     } else {
       fs.writeFileSync(
-        path.join(__dirname, "log/ignore.json"),
+        path.join(__dirname, 'log', `${new Date().toISOString().slice(0, 10)}.html`),
+        content
+      );
+      fs.writeFileSync(
+        path.join(__dirname, 'log', "ignore.json"),
         JSON.stringify(ignore)
       );
       logger.info("Done");

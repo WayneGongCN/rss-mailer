@@ -5,9 +5,11 @@
   <p><b>TOC:</b></p>
   <% for(let i = 0; i < renderData.length; i++){ %>
     <% let data = renderData[i]; %>
-    <div>
-      <%= data.result ? data.result.title : data.feed %>: <%= data.result ? data.result.items.length : 'error' %>
-    </div>
+    <% if (data.result && data.result.items.length) { %> 
+      <div>
+        <%= data.result ? data.result.title : data.feed %>: <%= data.result ? data.result.items.length : 'error' %>
+      </div>
+    <% } %>
   <% } %>
   </div>
   </br>
