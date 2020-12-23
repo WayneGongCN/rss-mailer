@@ -1,4 +1,3 @@
-require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const artTemplate = require("art-template");
@@ -10,104 +9,114 @@ const rssparser = new Rssparser();
 // init logger
 const { getLogger, configure } = require("log4js");
 const logger = getLogger();
-configure({
-  appenders: {
-    file: { type: "file", filename: path.join(__dirname, 'log', process.env.logPath) },
-    stdout: { type: 'stdout' }
-  },
-  categories: { default: { appenders: ["file", "stdout"], level: process.env.logLevel } },
-});
+const categories = { default: { appenders: ["file", "stdout"], level: 'info' } }
+const appenders = {
+  file: { type: "file", filename: path.join(__dirname, 'rssmailer.log') },
+  stdout: { type: 'stdout' }
+}
+configure({ categories, appenders });
 
 
-// init ignore map
-let ignore = {};
-try {
-  ignore = require(__dirname, 'log', "ignore.json");
-} catch (e) { }
+logger.info(`Start at \t ${new Date().toLocaleString()}`);
+const config = require("./config");
+const { feeds, mailer, filter } = config
 
 
-
-logger.info("Run task ----------");
-const rssConf = require("./rssConf");
-const smtpConf = {
-  port: process.env.port,
-  host: process.env.host,
-  auth: {
-    user: process.env.user,
-    pass: process.env.pass,
-  },
-};
-const emailConf = {
-  from: process.env.from,
-  to: process.env.to,
-  subject: process.env.subject,
-};
-
-fetchFeed(rssConf)
-  .then((feedsRes) => parseFeedData(feedsRes, rssConf))
-  .then((renderData) => sendEmail(smtpConf, emailConf, renderData));
+fetchFeed(feeds)
+  .then(feedsRes => parseFeedResult(feedsRes, filter))
+  .then(renderData => sendEmail(mailer.smtpConf, mailer.emailConf, renderData));
 
 
-function fetchFeed(rssConf) {
-  const promises = rssConf.feeds.map(feed => {
-    logger.info(`Fetching ${feed} ...`);
+/**
+ * Fetch feed content
+ * @param {Array<string>} feeds feed url  
+ */
+function fetchFeed(feeds) {
+  const promises = feeds.map(feed => {
+    logger.info(`Fetching \t ${feed} ...`);
     return rssparser
       .parseURL(feed)
       .then(result => {
-        logger.info(`Fetch ${feed} success`);
-        logger.debug('result: ', { ...result, items: result.items.length })
-        return { feed, result };
+        logger.info(`Success \t ${feed}`);
+        return { feed, result, error: null };
       })
-      .catch(e => {
-        logger.error("Error in fetch: ", feed, e);
-        return { feed, result: null };
+      .catch(error => {
+        logger.error("Fetch error: \t ", feed, error);
+        return { feed, error, result: null };
       });
   });
+
   return Promise.all(promises);
 }
 
 
-async function parseFeedData(feedsRes, rssConf) {
-  const promises = feedsRes.map((feedRes, idx) => {
-    let data = null;
-    try {
-      logger.debug(`parse feed: `, feedRes.feed)
-      data = rssConf.parser(feedRes, ignore);
-    } catch (e) {
-      logger.error("Error in parse: ", feedRes, e);
-    }
-    return data;
-  });
-  const renderData = await Promise.all(promises);
+async function parseFeedResult(feedsRes, filter) {
+  const now = Date.now()
+  const renderData = feedsRes.map(feedRes => {
+    const { feed, result, error } = feedRes
+    logger.info('Parse\t', feed)
+    if (error || !result) return feedRes
 
+    // result: items, feedUrl, title, description, link, language, copyright, lastBuildDate, ttl
+    // items: creator, author, title, link, pubDate, content, contentSnippet, guid, isoDate
+    let items = result.items
+
+    // filter by fresh
+    if (filter.fresh) {
+      items = items.filter(x => {
+        let date = (x.pubDate || x.isoDate)
+        if (!date) return false
+        return now - new Date(date).getTime() <= filter.fresh * 60 * 60 * 1000
+      })
+    }
+
+    if (filter.max > 0) {
+      items = items.slice(0, filter.max)
+    }
+
+    items = items.map(x => {
+      x.pubDate = new Date(x.pubDate).toLocaleString();
+      return x;
+    })
+
+    result.items = items
+    return feedRes;
+  });
+
+  logger.info('Render')
   artTemplate.defaults.minimize = true;
-  return artTemplate(path.join(__dirname, process.env.template), { renderData });
+  return artTemplate(path.join(__dirname, 'template.art'), { renderData });
 }
 
 
+/**
+ * Send email
+ * @param {*} smtpConf    https://nodemailer.com/smtp/
+ * @param {*} emailConf   https://nodemailer.com/message/
+ * @param {*} content     email content
+ */
 function sendEmail(smtpConf, emailConf, content) {
-  logger.debug('sendEmail: ', smtpConf, emailConf, content.length)
+  logger.info("Send email ...");
   const transporter = nodemailer.createTransport(smtpConf);
   const message = {
     ...emailConf,
     html: content,
   };
 
-  logger.info("Send email ...");
-  transporter.sendMail(message, (e, res) => {
-    logger.debug('sendEmail callback: ', e, res)
-    if (e) {
-      logger.error("Error in send email", e);
-    } else {
-      fs.writeFileSync(
-        path.join(__dirname, 'log', `${new Date().toISOString().slice(0, 10)}.html`),
-        content
-      );
-      fs.writeFileSync(
-        path.join(__dirname, 'log', "ignore.json"),
-        JSON.stringify(ignore)
-      );
+
+  return new Promise((resolve, reject) => {
+    transporter.sendMail(message, (e, res) => {
+      if (e) {
+        logger.error("Error on send email", e)
+        return reject(e)
+      }
+      logger.info("Send email success")
+
+      const htmlPath = path.join(__dirname, 'log', `${new Date().toISOString().slice(0, 10)}.html`)
+      fs.writeFileSync(htmlPath, content);
+
       logger.info("Done");
-    }
-  });
+      resolve(res)
+    });
+  })
 }

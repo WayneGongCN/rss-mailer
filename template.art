@@ -7,7 +7,11 @@
     <% let data = renderData[i]; %>
     <% if (data.result && data.result.items.length) { %> 
       <div>
-        <%= data.result ? data.result.title : data.feed %>: <%= data.result ? data.result.items.length : 'error' %>
+        <b><%= data.result.title %>: </b><%= data.result.items.length %>
+      </div>
+    <% } else if (data.error) {%>
+      <div>
+        <b><%= data.feed %>: </b><%= data.error.errno %> <%= data.error.code %>
       </div>
     <% } %>
   <% } %>
