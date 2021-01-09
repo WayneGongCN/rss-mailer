@@ -19,11 +19,11 @@ configure({ categories, appenders });
 
 logger.info(`Start at \t ${new Date().toLocaleString()}`);
 const config = require("./config");
-const { feeds, mailer, filter } = config
+const { feeds, mailer, filter, readLater } = config
 
 
 fetchFeed(feeds)
-  .then(feedsRes => parseFeedResult(feedsRes, filter))
+  .then(feedsRes => parseFeedResult(feedsRes, filter, readLater))
   .then(renderData => sendEmail(mailer.smtpConf, mailer.emailConf, renderData));
 
 
@@ -50,7 +50,13 @@ function fetchFeed(feeds) {
 }
 
 
-async function parseFeedResult(feedsRes, filter) {
+/**
+ * filter and render
+ * @param {*} feedsRes 
+ * @param {*} filter 
+ * @param {*} readLater 
+ */
+async function parseFeedResult(feedsRes, filter, readLater) {
   const now = Date.now()
   const renderData = feedsRes.map(feedRes => {
     const { feed, result, error } = feedRes
@@ -76,6 +82,19 @@ async function parseFeedResult(feedsRes, filter) {
 
     items = items.map(x => {
       x.pubDate = new Date(x.pubDate).toLocaleString();
+      if (readLater && readLater.clientId) {
+        let state = {
+          clientId: readLater.clientId,
+          title: x.title,
+          url: x.link,
+          feed: result.title
+        }
+        state = JSON.stringify(state)
+        state = encodeURIComponent(state)
+        state = encodeURIComponent(Buffer.from(state).toString('base64'))
+
+        x.readLaterUrl = `https://rssmailer.waynegong.cn/?state=${state}`
+      }
       return x;
     })
 
@@ -112,7 +131,7 @@ function sendEmail(smtpConf, emailConf, content) {
       }
       logger.info("Send email success")
 
-      const htmlPath = path.join(__dirname, 'log', `${new Date().toISOString().slice(0, 10)}.html`)
+      const htmlPath = path.join(__dirname, `${new Date().toISOString().slice(0, 10)}.html`)
       fs.writeFileSync(htmlPath, content);
 
       logger.info("Done");

@@ -31,7 +31,12 @@
           <div>
             <div>
               <a href="<%= item.link %>"><span><%= item.title %></span></a>
-              <div style="color: #6f6f6f;font-size: 11px;"><%= item.author ? item.author + ' - ' : '' %><%= item.pubDate %> </div>
+              <div style="font-size: 11px;">
+                <span style="color: #6f6f6f;"><%= item.author ? item.author + ' - ' : '' %><%= item.pubDate %></span>
+                <% if (item.readLaterUrl) { %> 
+                  <a href="<%= item.readLaterUrl %>"><span>Readlater</span></a>
+                <% } %>
+              </div>
             </div>
             <div><%= (item.contentSnippet || '').slice(0, 130) %>...</div>
             </br>
