@@ -22,6 +22,7 @@ const config = require("./config");
 const { feeds, mailer, filter, readLater } = config
 
 
+// main
 fetchFeed(feeds)
   .then(feedsRes => parseFeedResult(feedsRes, filter, readLater))
   .then(renderData => sendEmail(mailer.smtpConf, mailer.emailConf, renderData));
