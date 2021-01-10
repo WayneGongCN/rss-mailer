@@ -25,7 +25,7 @@ Read later 数据保存在 Microsoft To Do，优先保存到 ReadLater （需要
 
 ## Filter
 
-编辑 `config.js` 的 `filter` 配置 RSS 内容有效时效（fresh）与单个 feed 源最大数量（max）。
+编辑 `config.js` 的 `filter` 配置fresh（内容时效）、max（单个 feed 源最大数量）。
 
 
 ## crontab
