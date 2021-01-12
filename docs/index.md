@@ -1,37 +1,46 @@
-## Welcome to GitHub Pages
+## 使用
 
-You can use the [editor on GitHub](https://github.com/WayneGongCN/RSSMailer/edit/main/docs/index.md) to maintain and preview the content for your website in Markdown files.
+- `mv config.js.example config.js` 重命名 example 配置并进行对应修改；
+- `npm install` Or `yarn` 安装依赖
+- `node index.js` 执行脚本
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+![run](./images/run.gif)
+![run](./images/receive.gif)
 
-### Markdown
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+### Read later
 
-```markdown
-Syntax highlighted code block
+默认启用 read later 功能，删除 `config.js` 中 `readLater` 配置即可关闭。
 
-# Header 1
-## Header 2
-### Header 3
+Read later 通过 [Microsoft Graph API](https://docs.microsoft.com/en-us/graph/api/resources/todo-overview?view=graph-rest-1.0) 实现，首次使用需要可能登录 Outlook 账号。
 
-- Bulleted
-- List
+Read later 数据保存在 Microsoft To Do，优先保存到 ReadLater （需要手动创建），如果没有则保存到 default list。
 
-1. Numbered
-2. List
+![ReadLater](./images/readlater.gif)
 
-**Bold** and _Italic_ and `Code` text
 
-[Link](url) and ![Image](src)
+### Filter
+
+编辑 `config.js` 的 `filter` 配置fresh（内容时效）、max（单个 feed 源最大数量）。
+
+
+### crontab
+
+crontab 定时每天早上 8 点定时发送邮件。
+
+- `crontab -e`
+- `0 8 * * * cd /path/to/RSSMailer && node index.js`
+
+#### 使用 nvm
+
+使用 nvm 需要新建如下 `run.sh` 脚本。
+
+crontab 配置为： `0 8 * * * cd /path/to/RSSMailer && ./run.sh`。
 ```
+#!/bin/sh
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/WayneGongCN/RSSMailer/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+node index.js
+```
