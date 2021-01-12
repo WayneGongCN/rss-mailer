@@ -9,7 +9,7 @@ const DEFAULT_MSAL_CONF = {
   auth: {
     clientId: '5d27f006-5a2d-4a6f-b637-e39f0cf0e525',
     authority: "https://login.microsoftonline.com/consumers",
-    redirectUri: "https://rssmailer.waynegong.cn/",
+    redirectUri: "https://rssmailer.waynegong.cn/readlater.html",
   },
   cache: {
     cacheLocation: "sessionStorage",
@@ -180,21 +180,31 @@ function updateView(str) {
       const urlParams = new URLSearchParams(window.location.search);
       let stateParam = urlParams.get('state')
 
-      if (!stateParam) return updateView(`参数错误 state: ${stateParam}`)
+      if (!stateParam) {
+        const err = `参数错误 state: ${stateParam}`
+        updateView(err)
+        return Promise.reject(err)
+      }
       stateParam = parseState(stateParam)
 
       const { title, url, feed } = stateParam
-      updateView(`解析参数成功: ${feed} - ${title}`)
+      updateView(`解析参数成功`)
 
-      updateView(`正在创建 To do task...`)
+      updateView(`正在创建 ReadLater: ${title} ...`)
       return readLater.create({
-        title,
+        title: `${title} - RSSMailer`,
+        // 移动端无法展示 linkedResources
+        body: {
+          content: `${title}\n${url}`,
+          contentType: "text",
+        },
+        // PC 端 linkedResources 展示较为直观
         linkedResources: [{ webUrl: url, applicationName: feed, displayName: url }]
       })
     })
     .then(() => {
       updateView(`创建成功！`)
-      updateView(`<a href="javascript:closePage()" >关闭页面</a>`)
+      updateView(`<a href="https://to-do.live.com/">查看所有</a>&nbsp;&nbsp;<a href="javascript:closePage()" >关闭页面</a>`)
     })
     .catch(e => {
       updateView(`创建失败！${e.toString()}`)

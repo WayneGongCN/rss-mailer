@@ -94,7 +94,7 @@ async function parseFeedResult(feedsRes, filter, readLater) {
         state = encodeURIComponent(state)
         state = encodeURIComponent(Buffer.from(state).toString('base64'))
 
-        x.readLaterUrl = `https://rssmailer.waynegong.cn/?state=${state}`
+        x.readLaterUrl = `https://rssmailer.waynegong.cn/readlater.html?state=${state}`
       }
       return x;
     })
