@@ -38,7 +38,7 @@
                 <% } %>
               </div>
             </div>
-            <div><%= (item.contentSnippet || '').slice(0, 130) %>...</div>
+            <div><%= (item.contentSnippet || '').slice(0, 240) %>...</div>
             </br>
           </div>
 

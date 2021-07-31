@@ -1,3 +1,5 @@
+#!/home/ubuntu/.nvm/versions/node/v14.15.1/bin/node
+
 const fs = require("fs");
 const path = require("path");
 const artTemplate = require("art-template");
@@ -5,43 +7,46 @@ const nodemailer = require("nodemailer");
 const Rssparser = require("rss-parser");
 const rssparser = new Rssparser();
 
+// init config
+const config = require("./config");
+const { feeds, mailer, filter, readLater, htmlDir, logPath } = config;
 
 // init logger
 const { getLogger, configure } = require("log4js");
 const logger = getLogger();
-const categories = { default: { appenders: ["file", "stdout"], level: 'info' } }
-const appenders = {
-  file: { type: "file", filename: path.join(__dirname, 'rssmailer.log') },
-  stdout: { type: 'stdout' }
-}
+const categories = {
+  default: { appenders: ["file", "stdout"], level: "info" },
+};
+const appenders = { stdout: { type: "stdout" } };
+
+if (logPath)
+  appenders.file = { type: "file", filename: path.join(__dirname, logPath) };
+
 configure({ categories, appenders });
 
-
 logger.info(`Start at \t ${new Date().toLocaleString()}`);
-const config = require("./config");
-const { feeds, mailer, filter, readLater } = config
-
 
 // main
 fetchFeed(feeds)
-  .then(feedsRes => parseFeedResult(feedsRes, filter, readLater))
-  .then(renderData => sendEmail(mailer.smtpConf, mailer.emailConf, renderData));
-
+  .then((feedsRes) => parseFeedResult(feedsRes, filter, readLater))
+  .then((renderData) =>
+    sendEmail(mailer.smtpConf, mailer.emailConf, renderData)
+  );
 
 /**
  * Fetch feed content
- * @param {Array<string>} feeds feed url  
+ * @param {Array<string>} feeds feed url
  */
 function fetchFeed(feeds) {
-  const promises = feeds.map(feed => {
+  const promises = feeds.map((feed) => {
     logger.info(`Fetching \t ${feed} ...`);
     return rssparser
       .parseURL(feed)
-      .then(result => {
+      .then((result) => {
         logger.info(`Success \t ${feed}`);
         return { feed, result, error: null };
       })
-      .catch(error => {
+      .catch((error) => {
         logger.error("Fetch error: \t ", feed, error);
         return { feed, error, result: null };
       });
@@ -50,64 +55,62 @@ function fetchFeed(feeds) {
   return Promise.all(promises);
 }
 
-
 /**
  * filter and render
- * @param {*} feedsRes 
- * @param {*} filter 
- * @param {*} readLater 
+ * @param {*} feedsRes
+ * @param {*} filter
+ * @param {*} readLater
  */
 async function parseFeedResult(feedsRes, filter, readLater) {
-  const now = Date.now()
-  const renderData = feedsRes.map(feedRes => {
-    const { feed, result, error } = feedRes
-    logger.info('Parse\t', feed)
-    if (error || !result) return feedRes
+  const now = Date.now();
+  const renderData = feedsRes.map((feedRes) => {
+    const { feed, result, error } = feedRes;
+    logger.info("Parse\t", feed);
+    if (error || !result) return feedRes;
 
     // result: items, feedUrl, title, description, link, language, copyright, lastBuildDate, ttl
     // items: creator, author, title, link, pubDate, content, contentSnippet, guid, isoDate
-    let items = result.items
+    let items = result.items;
 
     // filter by fresh
     if (filter.fresh) {
-      items = items.filter(x => {
-        let date = (x.pubDate || x.isoDate)
-        if (!date) return false
-        return now - new Date(date).getTime() <= filter.fresh * 60 * 60 * 1000
-      })
+      items = items.filter((x) => {
+        let date = x.pubDate || x.isoDate;
+        if (!date) return false;
+        return now - new Date(date).getTime() <= filter.fresh * 60 * 60 * 1000;
+      });
     }
 
     if (filter.max > 0) {
-      items = items.slice(0, filter.max)
+      items = items.slice(0, filter.max);
     }
 
-    items = items.map(x => {
+    items = items.map((x) => {
       x.pubDate = new Date(x.pubDate).toLocaleString();
       if (readLater && readLater.clientId) {
         let state = {
           clientId: readLater.clientId,
           title: x.title,
           url: x.link,
-          feed: result.title
-        }
-        state = JSON.stringify(state)
-        state = encodeURIComponent(state)
-        state = encodeURIComponent(Buffer.from(state).toString('base64'))
+          feed: result.title,
+        };
+        state = JSON.stringify(state);
+        state = encodeURIComponent(state);
+        state = encodeURIComponent(Buffer.from(state).toString("base64"));
 
-        x.readLaterUrl = `https://rssmailer.waynegong.cn/readlater.html?state=${state}`
+        x.readLaterUrl = `https://rssmailer.waynegong.cn/readlater.html?state=${state}`;
       }
       return x;
-    })
+    });
 
-    result.items = items
+    result.items = items;
     return feedRes;
   });
 
-  logger.info('Render')
+  logger.info("Render");
   artTemplate.defaults.minimize = true;
-  return artTemplate(path.join(__dirname, 'template.art'), { renderData });
+  return artTemplate(path.join(__dirname, "template.art"), { renderData });
 }
-
 
 /**
  * Send email
@@ -123,20 +126,25 @@ function sendEmail(smtpConf, emailConf, content) {
     html: content,
   };
 
-
   return new Promise((resolve, reject) => {
     transporter.sendMail(message, (e, res) => {
       if (e) {
-        logger.error("Error on send email", e)
-        return reject(e)
+        logger.error("Error on send email", e);
+        return reject(e);
       }
-      logger.info("Send email success")
+      logger.info("Send email success");
 
-      const htmlPath = path.join(__dirname, `${new Date().toISOString().slice(0, 10)}.html`)
-      fs.writeFileSync(htmlPath, content);
+      if (htmlDir) {
+        const htmlFilePath = path.join(
+          __dirname,
+          `${new Date().toISOString().slice(0, 10)}.html`
+        );
+        logger.info(`Write html to: ${htmlFilePath}`);
+        fs.writeFileSync(htmlFilePath, content);
+      }
 
       logger.info("Done");
-      resolve(res)
+      resolve(res);
     });
-  })
+  });
 }
