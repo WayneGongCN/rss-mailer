@@ -37,9 +37,5 @@ module.exports = {
   filter: {
     fresh: 24,  // 24 hours
     max: 10      // item feed max records
-  },
-
-  readLater: {
-    clientId: '5d27f006-5a2d-4a6f-b637-e39f0cf0e525'
   }
 };

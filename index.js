@@ -9,7 +9,7 @@ const rssparser = new Rssparser();
 
 // init config
 const config = require("./config");
-const { feeds, mailer, filter, readLater, htmlDir, logPath } = config;
+const { feeds, mailer, filter, htmlDir, logPath } = config;
 
 // init logger
 const { getLogger, configure } = require("log4js");
@@ -28,7 +28,7 @@ logger.info(`Start at \t ${new Date().toLocaleString()}`);
 
 // main
 fetchFeed(feeds)
-  .then((feedsRes) => parseFeedResult(feedsRes, filter, readLater))
+  .then((feedsRes) => parseFeedResult(feedsRes, filter))
   .then((renderData) =>
     sendEmail(mailer.smtpConf, mailer.emailConf, renderData)
   );
@@ -59,9 +59,8 @@ function fetchFeed(feeds) {
  * filter and render
  * @param {*} feedsRes
  * @param {*} filter
- * @param {*} readLater
  */
-async function parseFeedResult(feedsRes, filter, readLater) {
+async function parseFeedResult(feedsRes, filter) {
   const now = Date.now();
   const renderData = feedsRes.map((feedRes) => {
     const { feed, result, error } = feedRes;
@@ -84,24 +83,6 @@ async function parseFeedResult(feedsRes, filter, readLater) {
     if (filter.max > 0) {
       items = items.slice(0, filter.max);
     }
-
-    items = items.map((x) => {
-      x.pubDate = new Date(x.pubDate).toLocaleString();
-      if (readLater && readLater.clientId) {
-        let state = {
-          clientId: readLater.clientId,
-          title: x.title,
-          url: x.link,
-          feed: result.title,
-        };
-        state = JSON.stringify(state);
-        state = encodeURIComponent(state);
-        state = encodeURIComponent(Buffer.from(state).toString("base64"));
-
-        x.readLaterUrl = `https://rssmailer.waynegong.cn/readlater.html?state=${state}`;
-      }
-      return x;
-    });
 
     result.items = items;
     return feedRes;
