@@ -5,7 +5,6 @@ const Rssparser = require("rss-parser");
 const rssparser = new Rssparser();
 const axios = require("axios");
 const iconv = require("iconv-lite");
-const fs = require("fs");// todo: delete
 
 const DEFAULT_FEED_CONF = {
   charset: "utf8",

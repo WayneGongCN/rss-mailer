@@ -1,13 +1,12 @@
 module.exports = {
   feeds: [
-    "http://www.bbc.co.uk/zhongwen/simp/index.xml",               // BBC 主页
-    "http://www.bbc.co.uk/zhongwen/simp/world/index.xml",         // BBC 国际
-    "https://sspai.com/feed",                                     // 少数派
-    "https://36kr.com/feed",                                      // 36氪
-    "http://feeds.feedburner.com/solidot",                        // 奇客Solidot
-    "https://www.ifanr.com/feed",                                 // 爱范儿
-    "https://wanqu.co/feed/",                                     // 湾区日报
+    {
+      feed: "http://bbs.pinggu.org/forum.php?mod=rss&fid=286&auth=0",
+      charset: 'gbk'
+    },
+    "http://feeds.feedburner.com/solidot",
   ],
+
 
   mailer: {
     smtpConf: {
@@ -25,9 +24,12 @@ module.exports = {
     }
   },
 
+  // 过滤参数
   filter: {
-    fresh: 24,  // 24 hours
-    max: 10      // item feed max records
+    // 按咨询新鲜度过滤
+    fresh: 24,
+    // 按 RSS 源咨询数量过滤
+    max: 10
   },
 
   logPath: './rssmailer.log'
