@@ -1,4 +1,6 @@
 node_modules
 html
+*.html
 log
+*.log
 config.js
