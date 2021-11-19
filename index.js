@@ -1,15 +1,19 @@
-#!/home/ubuntu/.nvm/versions/node/v14.15.1/bin/node
-
-const fs = require("fs");
 const path = require("path");
 const artTemplate = require("art-template");
 const nodemailer = require("nodemailer");
 const Rssparser = require("rss-parser");
 const rssparser = new Rssparser();
+const axios = require("axios");
+const iconv = require("iconv-lite");
+const fs = require("fs");// todo: delete
+
+const DEFAULT_FEED_CONF = {
+  charset: "utf8",
+};
 
 // init config
 const config = require("./config");
-const { feeds, mailer, filter, htmlDir, logPath } = config;
+const { feeds, mailer, filter, logPath } = config;
 
 // init logger
 const { getLogger, configure } = require("log4js");
@@ -18,12 +22,10 @@ const categories = {
   default: { appenders: ["file", "stdout"], level: "info" },
 };
 const appenders = { stdout: { type: "stdout" } };
-
 if (logPath)
   appenders.file = { type: "file", filename: path.join(__dirname, logPath) };
 
 configure({ categories, appenders });
-
 logger.info(`Start at \t ${new Date().toLocaleString()}`);
 
 // main
@@ -38,19 +40,38 @@ fetchFeed(feeds)
  * @param {Array<string>} feeds feed url
  */
 function fetchFeed(feeds) {
-  const promises = feeds.map((feed) => {
-    logger.info(`Fetching \t ${feed} ...`);
-    return rssparser
-      .parseURL(feed)
-      .then((result) => {
-        logger.info(`Success \t ${feed}`);
-        return { feed, result, error: null };
-      })
-      .catch((error) => {
-        logger.error("Fetch error: \t ", feed, error);
-        return { feed, error, result: null };
-      });
-  });
+  const promises = feeds
+    .map((x) => {
+      let feedConf = { ...DEFAULT_FEED_CONF };
+      if (typeof x === "string") {
+        feedConf.feed = x;
+      } else {
+        feedConf = Object.assign(feedConf, x);
+      }
+      if (!feedConf) return;
+
+      const {feed, charset} = feedConf
+      logger.info(`Fetching \t ${feed} ...`);
+      return axios
+        .get(feed, { responseType: "arraybuffer" })
+        .then(res => {
+          const decodeHandle = {
+            'utf8': (buffer) => buffer.toString('utf8'),
+            'gbk': buffer => iconv.decode(buffer, 'gbk')
+          }
+          return decodeHandle[charset](res.data)
+        })
+        .then(res => rssparser.parseString(res))
+        .then(result => {
+          logger.info(`Success \t ${feed}`)
+          return  { feed, result, error: null }
+        })
+        .catch(error => {
+          logger.error("Fetch error: \t ", feed, error);
+          return { feed, error, result: null };
+        })
+    })
+    .filter(Boolean);
 
   return Promise.all(promises);
 }
@@ -115,14 +136,6 @@ function sendEmail(smtpConf, emailConf, content) {
       }
       logger.info("Send email success");
 
-      if (htmlDir) {
-        const htmlFilePath = path.join(
-          __dirname,
-          `${new Date().toISOString().slice(0, 10)}.html`
-        );
-        logger.info(`Write html to: ${htmlFilePath}`);
-        fs.writeFileSync(htmlFilePath, content);
-      }
 
       logger.info("Done");
       resolve(res);
