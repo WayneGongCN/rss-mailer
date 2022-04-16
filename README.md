@@ -9,7 +9,6 @@
 - `node index.js` 执行脚本
 
 ![run](./docs/images/run.gif)
-![run](./docs/images/receive.gif)
 
 
 ### Filter
