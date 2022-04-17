@@ -45,8 +45,7 @@ export interface Feed {
 }
 
 const DEFAULT_CONF = {
-  template:
-    "rss-mailer/template/default.ejs",
+  template: "rss-mailer/template/default.ejs",
 };
 
 const FEED_DEFAULT_CONF: Partial<Feed> = {
