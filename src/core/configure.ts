@@ -1,4 +1,4 @@
-import { resolve } from "path";
+import path, { resolve } from "path";
 import { Options } from "../rssmailer";
 import logger from "./logger";
 
@@ -45,7 +45,7 @@ export interface Feed {
 }
 
 const DEFAULT_CONF = {
-  template: "rss-mailer/template/default.ejs",
+  template: path.join(__dirname, '../template/default.ejs'),
 };
 
 const FEED_DEFAULT_CONF: Partial<Feed> = {
