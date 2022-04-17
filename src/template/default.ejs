@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .feed__wrap {
+        margin-bottom: 3em;
+      }
+
+      .feed__list {
+
+      }
+
+      .item__wrap {
+        list-style: none;
+      }
+
+      .item__head {
+        margin-bottom: .5em;
+      }
+
+      .item__meta {
+        font-size: .8rem;
+        color: #6f6f6f;
+      }
+
+      .item__content {
+        margin-bottom: 2em;
+      }
+    </style>
+  </head>
+<body>
+  <% for(let i = 0; i < data.length; i++){ %>
+    <% let feed = data[i].filtered; %>
+    <% if (Array.isArray(feed.items) && feed.items.length) { %> 
+
+      <section class="feed__wrap">
+        <h3>
+          <a href="<%= feed.link %>">
+            <%= feed.title || feed.link %> (<%= feed.items.length %>)
+          </a>
+        </h3>
+
+        <ul class="feed__list">
+          <% for(let i = 0; i < feed.items.length; i++){ %>
+            <% let item = feed.items[i]; %>
+              <li class="item__wrap">
+                <section class="item__head">
+                  <b>
+                    <a href="<%= item.link %>"><%= item.title %></a>
+                  </b>
+                  <div class="item__meta">
+                    <span><%= item.author ? item.author + ' -' : '' %></span>
+                    <span><%= new Date(item.isoDate || item.pubDate).toLocaleString() %></span>
+                  </div>
+                </section>
+    
+                <section class="item__content">
+                  <%= (item.contentSnippet || '').slice(0, 240) %> ...
+                </section>
+              </li>
+          <% } %>
+        </ul>
+      </section>
+
+    <% } %>
+  <% } %>
+</body>
+</html>

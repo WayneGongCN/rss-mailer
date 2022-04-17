@@ -4,3 +4,4 @@ html
 log
 *.log
 config.js
+dist/
