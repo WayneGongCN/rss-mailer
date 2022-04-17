@@ -18,9 +18,9 @@ $ npm install -g rss-mailer
 $ rssmailer -c path/to/config
 ```
 
-## Confirure File
+## Configure File
 
-The configuration file supports `.json` and `.js` formats.
+The configure file supports `.json` and `.js` formats.
 
 Example: 
 ```js
