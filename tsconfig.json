@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist/",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": false,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  },
+  "include": [
+      "src"
+  ],
+  "exclude": ["node_modules"]
+}
