@@ -47,7 +47,12 @@ function handler(options: Options) {
     .then(filter(conf))
     .then(render(conf))
     .then(sender(conf))
+    .then(() => {
+      logger.info('done')
+      process.exit(0)
+    })
     .catch((e: any) => {
       logger.error(`UNKNOWN ERROR`, e?.message || e || '')
+      process.exit(-1)
     })
 }
