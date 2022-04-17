@@ -4,10 +4,10 @@
   "description": "RssMailer",
   "main": "index.js",
   "bin": {
-    "rssmailer": "dist/rssmailer.js"
+    "rssmailer": "dist/bin/rssmailer.js"
   },
   "scripts": {
-    "dev": "tsc -w",
+    "dev": "tsc -w --sourceMap",
     "build": "rm -fr ./dist && tsc && cp -r src/template dist/"
   },
   "repository": {

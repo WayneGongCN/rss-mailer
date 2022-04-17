@@ -16,6 +16,11 @@ const decodeHandleMap = {
 };
 
 
+/**
+ * 
+ * @param feed 
+ * @returns 
+ */
 function request(feed: Feed) {
   logger.info(`fetch ${feed.url}`);
   return axios
@@ -24,7 +29,7 @@ function request(feed: Feed) {
       logger.info(`fetch success ${feed.url}`);
       return res;
     })
-    .then((res) => decodeHandleMap[feed.charset || "utf8"](res.data))
+    .then((res) => decodeHandleMap[feed.charset](res.data))
     .then((original) => ({ feed, original }))
     .catch((error) => {
       logger.error(`fetch error ${feed.url}`, error?.message || error);

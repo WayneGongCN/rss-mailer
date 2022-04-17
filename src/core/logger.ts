@@ -1,17 +1,20 @@
 import { getLogger, configure } from "log4js";
 import { join } from "path";
 
+
 const logger = getLogger();
 
+
 const categories = {
-  default: { appenders: ["stdout", "file"], level: "trace" },
+  default: { appenders: ["stdout", "file"], level: "info" },
 };
+
 
 const appenders = {
   stdout: { type: "stdout" },
   file: { type: "file", filename: join(process.cwd(), "rssmailer.log") },
 };
 
-configure({ categories, appenders });
 
+configure({ categories, appenders });
 export default logger;

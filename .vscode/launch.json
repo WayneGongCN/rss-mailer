@@ -11,10 +11,7 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${workspaceFolder}/dist/src/index.js",
-      "outFiles": [
-        "${workspaceFolder}/dist/**/*.js"
-      ],
+      "program": "${workspaceFolder}/dist/rssmailer.js",
       "args": ["-c", "./config.js"]
     }
   ]

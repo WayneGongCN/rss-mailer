@@ -10,9 +10,10 @@ export type PaseRes = FetcherRes & {
 };
 
 
+/**
+ * 
+ */
 const parser: Parser<{}, {}> = new Parser();
-
-
 function parse(data: FetcherRes): Promise<PaseRes> {
   logger.info(`parse ${data.feed.url}`)
   return parser

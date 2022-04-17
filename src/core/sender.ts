@@ -4,12 +4,9 @@ import { createTransport } from "nodemailer";
 import { writeFile } from "fs";
 import path from "path";
 
+
 /**
  *
- * @param conf
- * @param emailConf
- * @param content
- * @returns
  */
 function sendEmail(conf: Conf, emailConf: EmailSenderConf, content: string) {
   logger.info(`Send email ${emailConf.host} ...`);
@@ -35,10 +32,6 @@ function sendEmail(conf: Conf, emailConf: EmailSenderConf, content: string) {
 
 /**
  *
- * @param conf
- * @param writeFileConf
- * @param content
- * @returns
  */
 function sendFile(
   conf: Conf,
@@ -60,6 +53,7 @@ function sendFile(
   });
 }
 
+
 /**
  *
  */
@@ -67,6 +61,7 @@ const handlerMap = {
   email: sendEmail,
   file: sendFile,
 };
+
 
 /**
  *

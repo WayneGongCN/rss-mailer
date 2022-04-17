@@ -3,8 +3,11 @@ import { Conf, CountFilterRule, FreshFilterRule } from "./configure";
 import logger from "./logger";
 import { PaseRes } from "./parser";
 
-const NOW = Date.now();
 
+/**
+ * 
+ */
+const NOW = Date.now();
 function freshFilter(rule: FreshFilterRule, item: Item) {
   const pubDate = item.pubDate;
   const isoDate = item.isoDate;
@@ -18,13 +21,20 @@ function freshFilter(rule: FreshFilterRule, item: Item) {
   }
 }
 
+
+/**
+ * TODO
+ */
 function countFilter(rule: CountFilterRule, item: Item) {}
 
+
+/**
+ * 
+ */
 const filterMap = {
   fresh: freshFilter,
   count: countFilter,
 };
-
 function handleFilter(filterRules: Conf["filter"], items: Item[]) {
   return items.filter((item) => {
     if (filterRules.length) {
@@ -37,6 +47,10 @@ function handleFilter(filterRules: Conf["filter"], items: Item[]) {
   });
 }
 
+
+/**
+ * 
+ */
 export default (conf: Conf) => (data: PaseRes[]) => {
   const { filter } = conf;
   return data.map((x) => {

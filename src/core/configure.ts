@@ -1,5 +1,5 @@
 import path, { resolve } from "path";
-import { Options } from "../rssmailer";
+import { Options } from "../bin/rssmailer";
 import logger from "./logger";
 
 export interface EmailSenderConf {
@@ -60,13 +60,14 @@ export default (confPath: string, options: Options): Conf => {
   const conf = require(resolveConfPath) as Conf;
   logger.debug({ conf });
 
-  const feeds = conf.feeds.map((x: string | Feed) => {
+  const mergedFeeds = conf.feeds.map((x: string | Feed) => {
     if (typeof x === "string") x = { ...FEED_DEFAULT_CONF, url: x } as Feed;
     return { ...FEED_DEFAULT_CONF, ...x };
   });
+
   return {
     ...DEFAULT_CONF,
     ...conf,
-    feeds,
+    feeds: mergedFeeds
   };
 };
