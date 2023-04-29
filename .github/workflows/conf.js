@@ -1,9 +1,9 @@
 
 module.exports = {
   feeds: [
-    "http://rsshub.waynegong.cn/bjnews/news",                     // 新京报 - 时事
-    "http://rsshub.waynegong.cn/bjnews/financial",                // 新京报 - 财经
-    "http://www.ruanyifeng.com/blog/atom.xml",                    // 阮一峰的网络日志
+    "https://rsshub.app/bjnews/news",                             // 新京报 - 时事
+    "https://rsshub.app/bjnews/financial",                        // 新京报 - 财经
+    "http://feeds.feedburner.com/ruanyifeng",                     // 阮一峰的网络日志
   ],
 
   sender: [
