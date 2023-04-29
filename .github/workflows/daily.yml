@@ -13,6 +13,7 @@ jobs:
   push:
     runs-on: ubuntu-latest
     env:
+      MAIL_HOST: ${{ secrets.MAIL_HOST }}
       MAIL_PORT: ${{ secrets.MAIL_PORT }}
       MAIL_USER: ${{ secrets.MAIL_USER }}
       MAIL_PASS: ${{ secrets.MAIL_PASS }}
