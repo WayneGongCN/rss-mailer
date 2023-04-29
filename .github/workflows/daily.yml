@@ -12,6 +12,15 @@ on:
 jobs:
   push:
     runs-on: ubuntu-latest
+    env:
+      MAIL_PORT: ${{ secrets.MAIL_PORT }}
+      MAIL_USER: ${{ secrets.MAIL_USER }}
+      MAIL_PASS: ${{ secrets.MAIL_PASS }}
+      MAIL_SUBJECT: ${{ secrets.MAIL_SUBJECT }}
+      MAIL_FROM: ${{ secrets.MAIL_FROM }}
+      MAIL_TO: ${{ secrets.MAIL_TO }}
+
+
     steps:
     - uses: actions/checkout@v3
 
