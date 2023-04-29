@@ -53,7 +53,7 @@ module.exports = {
       },
       
       // Email configure
-      subject: "RSSMailer Dailly",
+      subject: "RSSMailer Daily",
       from: "RSSMailer <RSSMailer@waynegong.cn>",
       to: "me@waynegong.cn",
     },
