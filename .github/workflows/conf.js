@@ -40,6 +40,6 @@ const conf = {
 };
 
 
-console.log(JSON.stringify('RSSMailer conf: ', conf))
+console.log('RSSMailer conf: ', JSON.stringify(conf))
 
 module.exports = conf;
