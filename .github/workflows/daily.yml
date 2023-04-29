@@ -23,4 +23,4 @@ jobs:
         cache: 'npm'
 
     - run: npm install -g rss-mailer
-    - run: rssmailer -c .github/workflows/config.js
+    - run: rssmailer -c .github/workflows/conf.js
