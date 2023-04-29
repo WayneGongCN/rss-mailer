@@ -24,3 +24,10 @@ jobs:
 
     - run: npm install -g rss-mailer
     - run: rssmailer -c .github/workflows/conf.js
+      env:
+        PORT: $MAIL_PORT
+        MAIL_USER: $MAIL_USER
+        MAIL_PASS: $MAIL_PASS
+        MAIL_SUBJECT: $MAIL_SUBJECT
+        MAIL_FROM: $MAIL_FROM
+        MAIL_TO: $MAIL_TO
