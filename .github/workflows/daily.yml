@@ -12,6 +12,14 @@ on:
 jobs:
   push:
     runs-on: ubuntu-latest
+    env:
+      PORT: $MAIL_PORT
+      MAIL_USER: $MAIL_USER
+      MAIL_PASS: $MAIL_PASS
+      MAIL_SUBJECT: $MAIL_SUBJECT
+      MAIL_FROM: $MAIL_FROM
+      MAIL_TO: $MAIL_TO
+
 
     steps:
     - uses: actions/checkout@v3
@@ -22,12 +30,6 @@ jobs:
         node-version: 16.x
         cache: 'npm'
 
+    - run: printenv
     - run: npm install -g rss-mailer
     - run: rssmailer -c .github/workflows/conf.js
-      env:
-        PORT: $MAIL_PORT
-        MAIL_USER: $MAIL_USER
-        MAIL_PASS: $MAIL_PASS
-        MAIL_SUBJECT: $MAIL_SUBJECT
-        MAIL_FROM: $MAIL_FROM
-        MAIL_TO: $MAIL_TO

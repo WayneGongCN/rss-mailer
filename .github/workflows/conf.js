@@ -1,5 +1,5 @@
 
-module.exports = {
+const conf = {
   feeds: [
     "https://rsshub.app/bjnews/news",                             // 新京报 - 时事
     "https://rsshub.app/bjnews/financial",                        // 新京报 - 财经
@@ -12,7 +12,7 @@ module.exports = {
 
       // SMTP configure
       host: process.env.MAIL_HOST,
-      port: process.env.PORT,
+      port: process.env.MAIL_PORT,
       secure: true,
       auth: {
         user: process.env.MAIL_USER,
@@ -38,3 +38,8 @@ module.exports = {
     }
   ],
 };
+
+
+console.log(JSON.stringify('RSSMailer conf: ', conf))
+
+module.exports = conf;
