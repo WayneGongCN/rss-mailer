@@ -13,7 +13,7 @@ jobs:
   push:
     runs-on: ubuntu-latest
     env:
-      PORT: ${{ env.MAIL_PORT }}
+      MAIL_PORT: ${{ env.MAIL_PORT }}
       MAIL_USER: ${{ env.MAIL_USER }}
       MAIL_PASS: ${{ env.MAIL_PASS }}
       MAIL_SUBJECT: ${{ env.MAIL_SUBJECT }}
