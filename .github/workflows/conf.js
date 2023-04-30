@@ -1,9 +1,13 @@
 
 const conf = {
   feeds: [
-    "https://rsshub.app/bjnews/news",                             // 新京报 - 时事
-    "https://rsshub.app/bjnews/financial",                        // 新京报 - 财经
-    "http://feeds.feedburner.com/ruanyifeng",                     // 阮一峰的网络日志
+    "https://rsshub.app/infzm/2",                     // 南方周末-新闻
+    "https://rsshub.app/wallstreetcn/global",         // 华尔街见闻 - 资讯
+    "https://rsshub.app/jiemian",                     // 快报_界面新闻
+    "https://rsshub.app/bjnews/realtime",             // 新京报
+    "https://rsshub.app/zaozao/article/quality",      // 前端早早聊
+    "https://rsshub.app/docschina/jsweekly",          // 印记中文周刊
+    "http://feeds.feedburner.com/ruanyifeng",         // 阮一峰的网络日志
   ],
 
   sender: [
